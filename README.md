@@ -68,6 +68,8 @@ Si tu repo se llama `ghost-games`, la URL por defecto será:
 
 `https://TU-USUARIO.github.io/ghost-games/`
 
+Usa siempre la URL completa con la `/` final.
+
 ### 5. Probar la build exacta de Pages
 
 ```bash

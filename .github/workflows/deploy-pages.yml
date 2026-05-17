@@ -33,7 +33,7 @@ jobs:
         run: npm ci
 
       - name: Build site
-        run: npm run build:pages
+        run: node ./node_modules/@angular/cli/bin/ng build --base-href "/${{ github.event.repository.name }}/"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
