@@ -1,0 +1,29 @@
+{
+  "name": "ghost-games",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./node_modules/@angular/cli/bin/ng serve --open",
+    "build": "node ./node_modules/@angular/cli/bin/ng build",
+    "build:pages": "node ./node_modules/@angular/cli/bin/ng build --base-href ./",
+    "generate-sprites": "node tools/generate-sprites.js"
+  },
+  "dependencies": {
+    "@angular/animations": "~16.0.0",
+    "@angular/common": "^16.0.6",
+    "@angular/compiler": "~16.0.0",
+    "@angular/core": "~16.0.0",
+    "@angular/forms": "~16.0.0",
+    "@angular/platform-browser": "~16.0.0",
+    "@angular/platform-browser-dynamic": "~16.0.0",
+    "rxjs": "^7.8.2",
+    "zone.js": "~0.13.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "~16.0.0",
+    "@angular/cli": "~16.0.0",
+    "@angular/compiler-cli": "~16.0.0",
+    "pngjs": "^6.0.0",
+    "typescript": "~5.0.0"
+  }
+}

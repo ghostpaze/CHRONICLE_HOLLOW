@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "projects": {
+    "ghost-games": {
+      "projectType": "application",
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/ghost-games",
+            "index": "src/index.html",
+            "main": "src/main.ts",
+            "polyfills": "src/polyfills.ts",
+            "tsConfig": "tsconfig.app.json",
+            "assets": ["src/assets"],
+            "styles": ["src/styles.css"],
+            "scripts": []
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "ghost-games:build"
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": "2b54553b-a059-42c3-aaf8-015be5c2763a"
+  }
+}

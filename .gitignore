@@ -1,0 +1,7 @@
+.idea/
+node_modules/
+dist/
+dist-*/
+/.angular
+npm-debug.log
+ghost_games/

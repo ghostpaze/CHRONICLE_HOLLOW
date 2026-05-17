@@ -1,0 +1,36 @@
+<section class="terminal-panel">
+  <div class="chatbot-header">
+    <div class="chatbot-id">
+      <div class="mini-portrait">
+        <img class="portrait-image" [src]="guidePortrait" alt="Guide portrait">
+      </div>
+      <div>
+        <p class="terminal-label">{{ name }}</p>
+        <p class="terminal-subtitle">Menu contextual / Zona: {{ zone }}</p>
+        <p class="terminal-room">{{ chapter?.subtitle || 'Contenido ajustado a la sala actual.' }}</p>
+      </div>
+    </div>
+
+    <div class="terminal-breadcrumb">{{ breadcrumb }}</div>
+  </div>
+
+  <div class="text-frame response-box">
+    <app-typewriter-text
+      [text]="activeResponse"
+      [replayKey]="responseTick"
+      [charDelay]="17"
+      [startDelay]="70"
+      soundProfile="terminal"></app-typewriter-text>
+  </div>
+
+  <div class="option-grid">
+    <button *ngFor="let option of currentOptions" type="button" class="option-btn" appUiBlip (click)="select(option)">
+      {{ option.label }}
+    </button>
+  </div>
+
+  <div class="utility-row">
+    <button type="button" class="btn" appUiBlip (click)="back()" [disabled]="path.length === 0">ATR&Aacute;S</button>
+    <button type="button" class="btn" appUiBlip (click)="home()">INICIO</button>
+  </div>
+</section>

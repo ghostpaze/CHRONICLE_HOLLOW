@@ -1,0 +1,161 @@
+<div class="app-shell">
+  <section *ngIf="screen === 'splash'" class="panel splash-screen">
+    <div class="hero-backdrop"></div>
+    <div class="hero-overlay"></div>
+
+    <div class="splash-layout">
+      <div class="splash-copy">
+        <p class="eyebrow">RETRO LEARNING QUEST</p>
+        <h1>CHRONICLE HOLLOW</h1>
+        <p class="lead">
+          Entras a una caverna viva donde cada sala te ense&ntilde;a un pedazo de la historia de los videojuegos,
+          sus g&eacute;neros y por qu&eacute; los metroidvania siguen obsesionando a tanta gente.
+        </p>
+
+        <div class="splash-stats">
+          <div class="stat-chip">7 Zonas</div>
+          <div class="stat-chip">Historia + G&eacute;neros</div>
+          <div class="stat-chip">Terminal Ramificado</div>
+        </div>
+
+        <div class="text-frame intro-box">
+          <p class="system-line">
+            * Una gu&iacute;a esquel&eacute;tica te espera junto a un mapa imposible.
+            Pulsa PLAY y el sitio deja de ser una p&aacute;gina: se vuelve un peque&ntilde;o recorrido jugable.
+          </p>
+        </div>
+
+        <button class="play-btn" type="button" appUiBlip (click)="start()">PLAY</button>
+      </div>
+
+      <aside class="text-frame creator-panel">
+        <div class="creator-header">
+          <div>
+            <p class="eyebrow">PERSONAJE</p>
+            <h3>Creaci&oacute;n De Personaje</h3>
+          </div>
+          <div class="creator-status-chip">{{ heroStatus }}</div>
+        </div>
+
+        <div class="creator-stage">
+          <div class="creator-glow"></div>
+          <img class="creator-sans" [src]="guidePreview" alt="Sans">
+          <img class="creator-hero" [src]="heroPreview" alt="Hero preview">
+        </div>
+
+        <div class="creator-copy">
+          <p class="micro-label">PREVIEW ACTIVO</p>
+          <p>
+            Si no creas uno, entra el protagonista predeterminado del mural.
+            Si eliges pelo, ropa y tono de piel, ese mismo pixelart aparece luego al lado de Sans.
+          </p>
+        </div>
+
+        <div class="creator-group">
+          <p class="micro-label">PELO</p>
+          <div class="creator-options">
+            <button
+              *ngFor="let option of hairOptions"
+              type="button"
+              class="creator-option"
+              appUiBlip
+              [class.active]="draft.hair === option.id"
+              (click)="selectHair(option.id)">
+              <span
+                class="creator-swatch"
+                [style.--swatch-main]="option.preview"
+                [style.--swatch-alt]="option.secondary || option.preview"></span>
+              <span>{{ option.label }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="creator-group">
+          <p class="micro-label">ROPA</p>
+          <div class="creator-options">
+            <button
+              *ngFor="let option of outfitOptions"
+              type="button"
+              class="creator-option"
+              appUiBlip
+              [class.active]="draft.outfit === option.id"
+              (click)="selectOutfit(option.id)">
+              <span
+                class="creator-swatch"
+                [style.--swatch-main]="option.preview"
+                [style.--swatch-alt]="option.secondary || option.preview"></span>
+              <span>{{ option.label }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="creator-group">
+          <p class="micro-label">TONO DE PIEL</p>
+          <div class="creator-options">
+            <button
+              *ngFor="let option of skinOptions"
+              type="button"
+              class="creator-option"
+              appUiBlip
+              [class.active]="draft.skin === option.id"
+              (click)="selectSkin(option.id)">
+              <span
+                class="creator-swatch"
+                [style.--swatch-main]="option.preview"
+                [style.--swatch-alt]="option.secondary || option.preview"></span>
+              <span>{{ option.label }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="creator-actions">
+          <button class="btn" type="button" appUiBlip (click)="useDefaultHero()">USAR PREDETERMINADO</button>
+          <p class="terminal-subtitle">Puedes entrar directo con PLAY o dejar tu personaje listo antes de empezar.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section *ngIf="screen === 'game'" class="panel game-screen">
+    <app-game (onFinish)="finish()"></app-game>
+  </section>
+
+  <section *ngIf="screen === 'end'" class="panel ending-screen">
+    <div class="hero-backdrop end-backdrop"></div>
+    <div class="hero-overlay"></div>
+
+    <div class="ending-copy">
+      <p class="eyebrow">RUN COMPLETE</p>
+      <h2>FIN DEL RECORRIDO</h2>
+
+      <div class="ending-grid">
+        <article class="ending-card">
+          <span class="micro-label">HISTORIA</span>
+          <strong>De laboratorios a mundos inmensos</strong>
+        </article>
+        <article class="ending-card">
+          <span class="micro-label">G&Eacute;NEROS</span>
+          <strong>Cada mec&aacute;nica cambia c&oacute;mo sentimos jugar</strong>
+        </article>
+        <article class="ending-card">
+          <span class="micro-label">METROIDVANIA</span>
+          <strong>Mapa, memoria y progreso entrelazados</strong>
+        </article>
+        <article class="ending-card">
+          <span class="micro-label">INDIE</span>
+          <strong>Equipos peque&ntilde;os, ideas enormes</strong>
+        </article>
+      </div>
+
+      <div class="text-frame outro-box">
+        <p class="system-line">
+          * Ya viste que los videojuegos no son solo entretenimiento:
+          tambi&eacute;n son historia, dise&ntilde;o, emoci&oacute;n y experimentaci&oacute;n.
+          Reinicia cuando quieras y vuelve a perderte en el mapa.
+        </p>
+      </div>
+
+      <button class="play-btn" type="button" appUiBlip (click)="restart()">RESTART</button>
+    </div>
+  </section>
+</div>

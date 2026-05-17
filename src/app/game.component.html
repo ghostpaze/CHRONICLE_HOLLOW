@@ -1,0 +1,116 @@
+<section class="game-shell">
+  <header class="hud">
+    <article class="hud-card">
+      <span class="micro-label">RUN</span>
+      <strong>{{ step + 1 }}/{{ chapters.length }}</strong>
+    </article>
+    <article class="hud-card">
+      <span class="micro-label">ZONA</span>
+      <strong>{{ current.zone }}</strong>
+    </article>
+    <article class="hud-card">
+      <span class="micro-label">TITULO</span>
+      <strong>{{ current.title }}</strong>
+    </article>
+    <article class="hud-card progress-card">
+      <span class="micro-label">PROGRESO</span>
+      <div class="progress-track">
+        <div class="progress-fill" [style.width.%]="progressPercent"></div>
+      </div>
+    </article>
+  </header>
+
+  <div class="main-grid">
+    <div class="stage-panel">
+      <div class="stage" [ngClass]="'zone-' + current.vibe">
+        <div class="zone-badge">
+          <span>{{ current.zone }}</span>
+          <strong>{{ current.subtitle }}</strong>
+        </div>
+
+        <div class="text-frame stage-copy">
+          <p class="micro-label">OBJETIVO</p>
+          <p>{{ current.objective }}</p>
+        </div>
+
+        <img class="pixel-sprite hero-sprite" [src]="heroSprite" alt="Hero sprite">
+        <img class="pixel-sprite guide-sprite" [src]="guideSprite" alt="Guide sprite">
+        <img class="pixel-sprite save-star" [src]="starSprite" alt="Save star">
+        <img class="pixel-sprite artifact artifact-arcade" [src]="arcadeSprite" alt="Arcade cabinet">
+        <img class="pixel-sprite artifact artifact-cyan" [src]="cyanOrb" alt="Cyan orb">
+        <img class="pixel-sprite artifact artifact-rose" [src]="roseOrb" alt="Rose orb">
+      </div>
+    </div>
+
+    <aside class="lesson-grid">
+      <article class="card">
+        <p class="micro-label">SALA ACTIVA</p>
+        <h3>{{ current.title }}</h3>
+        <p>{{ current.summary }}</p>
+      </article>
+
+      <article class="card">
+        <p class="micro-label">LO QUE APRENDES</p>
+        <ul class="learn-list">
+          <li *ngFor="let item of current.learnings">{{ item }}</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <p class="micro-label">PUNTOS CLAVE</p>
+        <div class="spotlight-list">
+          <div *ngFor="let item of current.spotlight" class="spotlight-item" [ngClass]="'tone-' + item.tone">
+            <span>{{ item.label }}</span>
+            <strong>{{ item.value }}</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <p class="micro-label">RUTA</p>
+        <div class="timeline">
+          <button
+            *ngFor="let chapter of chapters; let i = index"
+            type="button"
+            class="timeline-node"
+            appUiBlip
+            [class.active]="i === step"
+            (click)="jumpTo(i)">
+            {{ i + 1 }}
+          </button>
+        </div>
+      </article>
+    </aside>
+  </div>
+
+  <div class="dialog-panel">
+    <div class="speaker-box">
+      <div class="portrait-frame">
+        <img class="portrait-image" [src]="speakerPortrait" [alt]="current.speakerName">
+      </div>
+      <div class="speaker-meta">
+        <span class="micro-label">CHATBOT</span>
+        <strong>{{ current.speakerName }}</strong>
+      </div>
+    </div>
+
+    <div class="text-frame dialog-box">
+      <div class="dialog-name">{{ current.speakerName }} // {{ current.zone }}</div>
+      <app-typewriter-text
+        [text]="current.dialogue"
+        [replayKey]="current.id"
+        [charDelay]="18"
+        [startDelay]="85"
+        [soundProfile]="current.speaker"></app-typewriter-text>
+      <p class="dialog-help">Usa el terminal de abajo si quieres profundizar sin salir del recorrido.</p>
+    </div>
+  </div>
+
+  <div class="control-row">
+    <button class="btn" type="button" appUiBlip (click)="previous()" [disabled]="step === 0">ATR&Aacute;S</button>
+    <div class="control-copy">{{ current.title }} / {{ step + 1 }} de {{ chapters.length }}</div>
+    <button class="btn primary" type="button" appUiBlip (click)="next()">{{ nextLabel }}</button>
+  </div>
+
+  <app-chatbot [zone]="current.zone" [chapter]="current"></app-chatbot>
+</section>
