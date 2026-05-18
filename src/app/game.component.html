@@ -9,7 +9,7 @@
       <strong>{{ current.zone }}</strong>
     </article>
     <article class="hud-card">
-      <span class="micro-label">TITULO</span>
+      <span class="micro-label">T&Iacute;TULO</span>
       <strong>{{ current.title }}</strong>
     </article>
     <article class="hud-card progress-card">
@@ -33,12 +33,12 @@
           <p>{{ current.objective }}</p>
         </div>
 
-        <img class="pixel-sprite hero-sprite" [src]="heroSprite" alt="Hero sprite">
-        <img class="pixel-sprite guide-sprite" [src]="guideSprite" alt="Guide sprite">
-        <img class="pixel-sprite save-star" [src]="starSprite" alt="Save star">
-        <img class="pixel-sprite artifact artifact-arcade" [src]="arcadeSprite" alt="Arcade cabinet">
-        <img class="pixel-sprite artifact artifact-cyan" [src]="cyanOrb" alt="Cyan orb">
-        <img class="pixel-sprite artifact artifact-rose" [src]="roseOrb" alt="Rose orb">
+        <img class="pixel-sprite hero-sprite" [src]="heroSprite" alt="Sprite de Ghost">
+        <img class="pixel-sprite guide-sprite" [src]="guideSprite" alt="Sprite de Sans">
+        <img class="pixel-sprite save-star" [src]="starSprite" alt="Estrella de guardado">
+        <img class="pixel-sprite artifact artifact-arcade" [src]="arcadeSprite" alt="Cabina arcade">
+        <img class="pixel-sprite artifact artifact-cyan" [src]="cyanOrb" alt="Orbe cian">
+        <img class="pixel-sprite artifact artifact-rose" [src]="roseOrb" alt="Orbe rosa">
       </div>
     </div>
 
@@ -86,7 +86,7 @@
   <div class="dialog-panel">
     <div class="speaker-box">
       <div class="portrait-frame">
-        <img class="portrait-image" [src]="speakerPortrait" [alt]="current.speakerName">
+        <img class="portrait-image" [src]="speakerPortrait" [alt]="'Retrato de ' + current.speakerName">
       </div>
       <div class="speaker-meta">
         <span class="micro-label">CHATBOT</span>

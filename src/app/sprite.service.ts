@@ -50,6 +50,11 @@ interface ResolvedHero {
 export class SpriteService {
   private readonly sansSpritePath = 'assets/sans-sprite.png';
   private readonly sansPortraitPath = 'assets/sans-portrait.png';
+  private readonly heroCanvasWidth = 32;
+  private readonly heroCanvasHeight = 36;
+  private readonly heroPortraitCropX = 4;
+  private readonly heroPortraitCropY = 0;
+  private readonly heroPortraitCropSize = 24;
   private readonly outline = '#121018';
   private readonly face = '#17141d';
   private readonly eye = '#f8f5ed';
@@ -60,7 +65,7 @@ export class SpriteService {
     { id: 'moon-bob', label: 'Bob Lunar', preview: '#d6d5df', secondary: '#9fa0b2', main: '#d6d5df', shadow: '#9fa0b2', shape: 'bob' },
     { id: 'comet-pony', label: 'Cola Cometa', preview: '#a25b36', secondary: '#6c341e', main: '#a25b36', shadow: '#6c341e', shape: 'pony' },
     { id: 'solar-curls', label: 'Rizos Solar', preview: '#d9a34b', secondary: '#8d5b21', main: '#d9a34b', shadow: '#8d5b21', shape: 'curls' },
-    { id: 'neon-spikes', label: 'Puntas Neon', preview: '#2fddcf', secondary: '#107f78', main: '#2fddcf', shadow: '#107f78', shape: 'spikes' }
+    { id: 'neon-spikes', label: 'Puntas Ne\u00f3n', preview: '#2fddcf', secondary: '#107f78', main: '#2fddcf', shadow: '#107f78', shape: 'spikes' }
   ];
 
   private readonly outfitStyles: OutfitStyle[] = [
@@ -96,7 +101,7 @@ export class SpriteService {
     },
     {
       id: 'neon-guard',
-      label: 'Guardia Neon',
+      label: 'Guardia Ne\u00f3n',
       preview: '#8d2b42',
       secondary: '#ff7ca5',
       main: '#8d2b42',
@@ -146,7 +151,7 @@ export class SpriteService {
     { id: 'miel', label: 'Miel', preview: '#ddb387', secondary: '#b68258', base: '#ddb387', shadow: '#b68258' },
     { id: 'canela', label: 'Canela', preview: '#bc875f', secondary: '#915f3d', base: '#bc875f', shadow: '#915f3d' },
     { id: 'cobre', label: 'Cobre', preview: '#955f45', secondary: '#6b3d2b', base: '#955f45', shadow: '#6b3d2b' },
-    { id: 'ebano', label: 'Ebano', preview: '#704435', secondary: '#4f291f', base: '#704435', shadow: '#4f291f' }
+    { id: 'ebano', label: '\u00c9bano', preview: '#704435', secondary: '#4f291f', base: '#704435', shadow: '#4f291f' }
   ];
 
   readonly hairOptions: CharacterOption[] = this.hairStyles.map(({ id, label, preview, secondary }) => ({
@@ -371,9 +376,9 @@ export class SpriteService {
       return '';
     }
 
-    const cropX = 2 * scale;
-    const cropY = 0;
-    const cropSize = 24 * scale;
+    const cropX = this.heroPortraitCropX * scale;
+    const cropY = this.heroPortraitCropY * scale;
+    const cropSize = this.heroPortraitCropSize * scale;
     const canvas = document.createElement('canvas');
     canvas.width = cropSize;
     canvas.height = cropSize;
@@ -391,8 +396,8 @@ export class SpriteService {
 
   private createHeroCanvas(hero: ResolvedHero, scale: number): HTMLCanvasElement | null {
     const canvas = document.createElement('canvas');
-    canvas.width = 28 * scale;
-    canvas.height = 40 * scale;
+    canvas.width = this.heroCanvasWidth * scale;
+    canvas.height = this.heroCanvasHeight * scale;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
@@ -426,145 +431,145 @@ export class SpriteService {
 
   private drawLegs(hero: ResolvedHero, paint: (color: string, rects: Rect[]) => void): void {
     paint(this.outline, [
-      [10, 27, 4, 10],
-      [14, 27, 4, 10],
-      [8, 35, 7, 4],
-      [13, 35, 7, 4]
+      [12, 25, 3, 7],
+      [17, 25, 3, 7],
+      [11, 31, 5, 3],
+      [17, 31, 5, 3]
     ]);
 
     paint(hero.outfit.pantsShadow, [
-      [10, 28, 3, 7],
-      [15, 28, 3, 7]
+      [12, 26, 2, 5],
+      [18, 26, 2, 5]
     ]);
 
     paint(hero.outfit.pants, [
-      [11, 28, 2, 7],
-      [16, 28, 2, 7],
-      [10, 35, 3, 1],
-      [15, 35, 3, 1]
+      [13, 26, 1, 5],
+      [18, 26, 1, 5],
+      [12, 31, 2, 1],
+      [18, 31, 2, 1]
     ]);
 
     paint(hero.outfit.boots, [
-      [9, 36, 5, 2],
-      [14, 36, 5, 2],
-      [10, 38, 4, 1],
-      [15, 38, 4, 1]
+      [11, 32, 5, 2],
+      [17, 32, 5, 2],
+      [12, 34, 4, 1],
+      [18, 34, 4, 1]
     ]);
 
     paint(hero.outfit.bootsHighlight, [
-      [10, 36, 3, 1],
-      [15, 36, 3, 1]
+      [12, 32, 3, 1],
+      [18, 32, 3, 1]
     ]);
   }
 
   private drawTorso(hero: ResolvedHero, paint: (color: string, rects: Rect[]) => void): void {
     paint(this.outline, [
-      [3, 15, 4, 12],
-      [21, 15, 4, 12],
-      [6, 15, 16, 13],
-      [4, 24, 4, 4],
-      [20, 24, 4, 4],
-      [12, 13, 4, 2]
+      [10, 15, 12, 11],
+      [7, 17, 3, 8],
+      [22, 17, 3, 8],
+      [8, 24, 2, 2],
+      [22, 24, 2, 2],
+      [14, 13, 4, 2]
     ]);
 
     paint(hero.skin.shadow, [
-      [5, 25, 2, 2],
-      [21, 25, 2, 2]
+      [8, 24, 2, 2],
+      [22, 24, 2, 2]
     ]);
 
     paint(hero.skin.base, [
-      [5, 24, 2, 2],
-      [21, 24, 2, 2],
-      [13, 13, 2, 2]
+      [8, 23, 2, 2],
+      [22, 23, 2, 2],
+      [15, 13, 2, 2]
     ]);
 
     paint(hero.outfit.shadow, [
-      [4, 16, 3, 9],
-      [21, 16, 3, 9],
-      [7, 16, 14, 11]
+      [8, 18, 2, 6],
+      [22, 18, 2, 6],
+      [10, 17, 12, 8]
     ]);
 
     paint(hero.outfit.main, [
-      [5, 16, 2, 8],
-      [21, 16, 2, 8],
-      [8, 16, 12, 10]
+      [9, 18, 1, 5],
+      [22, 18, 1, 5],
+      [11, 17, 10, 7]
     ]);
 
     switch (hero.outfit.silhouette) {
       case 'coat':
         paint(hero.outfit.accent, [
-          [5, 18, 2, 6],
-          [21, 18, 2, 6],
-          [10, 19, 8, 2]
+          [9, 19, 1, 4],
+          [22, 19, 1, 4],
+          [12, 19, 8, 2]
         ]);
         paint(hero.outfit.trim, [
-          [10, 17, 8, 1],
-          [11, 21, 6, 1]
+          [12, 17, 8, 1],
+          [13, 21, 6, 1]
         ]);
         paint(hero.outfit.shadow, [
-          [7, 24, 2, 4],
-          [19, 24, 2, 4]
+          [10, 24, 1, 3],
+          [21, 24, 1, 3]
         ]);
         break;
       case 'hoodie':
         paint(hero.outfit.shadow, [
-          [7, 14, 3, 4],
-          [18, 14, 3, 4],
-          [10, 24, 8, 2]
+          [11, 15, 3, 3],
+          [18, 15, 3, 3],
+          [12, 24, 8, 1]
         ]);
         paint(hero.outfit.accent, [
-          [11, 18, 6, 1],
-          [11, 22, 6, 1]
+          [14, 20, 1, 3],
+          [17, 20, 1, 3]
         ]);
         paint(hero.outfit.trim, [
-          [12, 19, 1, 4],
-          [15, 19, 1, 4]
+          [12, 18, 8, 1],
+          [13, 21, 6, 1]
         ]);
         break;
       case 'armor':
         paint(hero.outfit.shadow, [
-          [6, 16, 3, 3],
-          [19, 16, 3, 3],
-          [9, 21, 10, 2]
+          [10, 16, 2, 2],
+          [20, 16, 2, 2],
+          [12, 21, 8, 2]
         ]);
         paint(hero.outfit.accent, [
-          [10, 17, 8, 3],
-          [11, 23, 6, 1]
+          [12, 17, 8, 3],
+          [13, 23, 6, 1]
         ]);
         paint(hero.outfit.trim, [
-          [11, 18, 6, 1],
-          [10, 24, 8, 1]
+          [13, 18, 6, 1],
+          [12, 24, 8, 1]
         ]);
         break;
       case 'bomber':
         paint(hero.outfit.accent, [
-          [9, 18, 10, 1],
-          [10, 24, 8, 1]
+          [12, 19, 8, 1],
+          [13, 23, 6, 1]
         ]);
         paint(hero.outfit.trim, [
-          [11, 16, 6, 1],
-          [8, 21, 12, 1]
+          [13, 17, 6, 1],
+          [11, 21, 10, 1]
         ]);
         paint(hero.outfit.shadow, [
-          [5, 23, 2, 2],
-          [21, 23, 2, 2]
+          [9, 22, 1, 2],
+          [22, 22, 1, 2]
         ]);
         break;
       case 'robe':
         paint(hero.outfit.shadow, [
-          [7, 24, 3, 7],
-          [18, 24, 3, 7]
+          [10, 24, 2, 5],
+          [20, 24, 2, 5]
         ]);
         paint(hero.outfit.main, [
-          [9, 24, 3, 6],
-          [16, 24, 3, 6]
+          [12, 24, 2, 4],
+          [18, 24, 2, 4]
         ]);
         paint(hero.outfit.accent, [
-          [10, 19, 8, 1],
-          [11, 23, 6, 1]
+          [12, 19, 8, 1],
+          [13, 23, 6, 1]
         ]);
         paint(hero.outfit.trim, [
-          [10, 17, 8, 1]
+          [12, 17, 8, 1]
         ]);
         break;
     }
@@ -576,33 +581,33 @@ export class SpriteService {
     dots: (color: string, points: Array<[number, number]>) => void
   ): void {
     paint(this.outline, [
-      [10, 1, 8, 1],
-      [9, 2, 10, 1],
-      [8, 3, 12, 9],
-      [9, 12, 10, 1],
-      [10, 13, 8, 1],
-      [8, 6, 1, 3],
-      [19, 6, 1, 3]
+      [10, 2, 12, 1],
+      [9, 3, 14, 1],
+      [8, 4, 16, 8],
+      [9, 12, 14, 1],
+      [10, 13, 12, 1],
+      [8, 6, 1, 4],
+      [23, 6, 1, 4]
     ]);
 
     paint(hero.skin.shadow, [
-      [10, 2, 8, 1],
-      [9, 3, 10, 8],
-      [10, 11, 8, 1],
+      [10, 3, 12, 1],
+      [9, 4, 14, 7],
+      [10, 11, 12, 1],
       [8, 7, 1, 1],
-      [19, 7, 1, 1]
+      [23, 7, 1, 1]
     ]);
 
     paint(hero.skin.base, [
-      [11, 2, 6, 1],
-      [10, 3, 8, 6],
-      [11, 9, 6, 2],
-      [12, 11, 4, 1]
+      [11, 3, 10, 1],
+      [10, 4, 12, 6],
+      [11, 10, 10, 2],
+      [12, 12, 8, 1]
     ]);
 
     dots(this.blush, [
-      [10, 9],
-      [17, 9]
+      [11, 10],
+      [20, 10]
     ]);
   }
 
@@ -610,150 +615,139 @@ export class SpriteService {
     switch (hero.hair.shape) {
       case 'mural':
         paint(this.outline, [
-          [10, 0, 8, 2],
-          [9, 2, 10, 2],
-          [8, 4, 4, 3],
-          [12, 3, 8, 4],
-          [9, 7, 3, 2],
-          [16, 6, 4, 3]
+          [10, 0, 10, 2],
+          [9, 2, 12, 2],
+          [8, 4, 5, 4],
+          [13, 3, 9, 5],
+          [10, 8, 3, 2],
+          [18, 7, 4, 2]
         ]);
         paint(hero.hair.shadow, [
-          [10, 1, 8, 1],
-          [9, 3, 4, 2],
-          [13, 3, 6, 3],
-          [9, 7, 2, 1],
-          [17, 6, 2, 2]
+          [10, 1, 10, 1],
+          [9, 3, 5, 2],
+          [14, 3, 7, 4],
+          [10, 8, 2, 1],
+          [18, 7, 2, 1]
         ]);
         paint(hero.hair.main, [
-          [11, 1, 6, 1],
-          [10, 3, 3, 1],
-          [13, 3, 5, 2],
-          [10, 6, 2, 1],
-          [16, 5, 2, 2]
+          [11, 1, 8, 1],
+          [10, 3, 4, 1],
+          [14, 3, 6, 3],
+          [11, 6, 2, 1],
+          [18, 5, 2, 2]
         ]);
         break;
       case 'bob':
         paint(this.outline, [
-          [9, 0, 10, 2],
-          [8, 2, 12, 2],
-          [7, 4, 14, 5],
-          [8, 9, 12, 2]
+          [9, 0, 14, 2],
+          [8, 2, 16, 2],
+          [7, 4, 18, 5],
+          [8, 9, 16, 2]
         ]);
         paint(hero.hair.shadow, [
-          [9, 1, 10, 1],
-          [8, 3, 12, 1],
-          [8, 4, 4, 4],
-          [12, 4, 8, 5],
-          [9, 9, 10, 1]
+          [9, 1, 14, 1],
+          [8, 3, 16, 1],
+          [8, 4, 5, 4],
+          [13, 4, 10, 5],
+          [9, 9, 14, 1]
         ]);
         paint(hero.hair.main, [
-          [10, 1, 8, 1],
-          [9, 3, 10, 1],
-          [9, 4, 3, 3],
-          [12, 4, 6, 4],
-          [10, 8, 8, 1]
+          [10, 1, 12, 1],
+          [9, 3, 14, 1],
+          [9, 4, 4, 3],
+          [13, 4, 8, 4],
+          [10, 8, 12, 1]
         ]);
         break;
       case 'pony':
         paint(this.outline, [
-          [10, 0, 8, 2],
-          [9, 2, 10, 2],
-          [9, 4, 8, 3],
-          [18, 4, 4, 7],
-          [20, 10, 2, 2]
+          [10, 0, 10, 2],
+          [9, 2, 12, 2],
+          [9, 4, 10, 3],
+          [20, 4, 4, 7],
+          [21, 10, 2, 2]
         ]);
         paint(hero.hair.shadow, [
-          [10, 1, 8, 1],
-          [9, 3, 10, 1],
-          [10, 4, 7, 2],
-          [19, 5, 2, 5]
+          [10, 1, 10, 1],
+          [9, 3, 12, 1],
+          [10, 4, 9, 2],
+          [21, 5, 2, 5]
         ]);
         paint(hero.hair.main, [
-          [11, 1, 6, 1],
-          [10, 3, 8, 1],
-          [11, 4, 5, 2],
-          [20, 6, 1, 4]
+          [11, 1, 8, 1],
+          [10, 3, 10, 1],
+          [11, 4, 7, 2],
+          [22, 6, 1, 4]
         ]);
         break;
       case 'curls':
         paint(this.outline, [
-          [10, 0, 3, 2],
-          [14, 0, 3, 2],
-          [8, 2, 12, 3],
-          [7, 5, 5, 4],
-          [16, 5, 5, 4]
+          [10, 0, 4, 2],
+          [18, 0, 4, 2],
+          [8, 2, 16, 3],
+          [7, 5, 6, 4],
+          [19, 5, 6, 4]
         ]);
         paint(hero.hair.shadow, [
-          [10, 1, 3, 1],
-          [14, 1, 3, 1],
-          [9, 2, 10, 2],
-          [8, 5, 3, 3],
-          [17, 5, 3, 3]
+          [10, 1, 4, 1],
+          [18, 1, 4, 1],
+          [9, 2, 14, 2],
+          [8, 5, 4, 3],
+          [20, 5, 4, 3]
         ]);
         paint(hero.hair.main, [
-          [10, 2, 8, 1],
-          [9, 3, 10, 1],
-          [9, 5, 2, 2],
-          [17, 5, 2, 2]
+          [10, 2, 12, 1],
+          [9, 3, 14, 1],
+          [9, 5, 3, 2],
+          [20, 5, 3, 2]
         ]);
         break;
       case 'spikes':
         paint(this.outline, [
-          [11, 0, 2, 2],
-          [14, 0, 2, 2],
-          [9, 2, 10, 2],
-          [8, 4, 4, 4],
-          [12, 3, 8, 4]
+          [11, 0, 3, 2],
+          [18, 0, 3, 2],
+          [9, 2, 14, 2],
+          [8, 4, 5, 4],
+          [13, 3, 10, 4]
         ]);
         paint(hero.hair.shadow, [
-          [11, 1, 2, 1],
-          [14, 1, 2, 1],
-          [9, 3, 3, 1],
-          [12, 3, 7, 2],
-          [9, 5, 2, 2]
+          [11, 1, 3, 1],
+          [18, 1, 3, 1],
+          [9, 3, 4, 1],
+          [13, 3, 9, 2],
+          [9, 5, 3, 2]
         ]);
         paint(hero.hair.main, [
-          [10, 2, 2, 1],
-          [13, 2, 2, 1],
-          [11, 3, 2, 1],
-          [15, 3, 2, 1],
-          [10, 5, 8, 1]
+          [10, 2, 3, 1],
+          [17, 2, 3, 1],
+          [12, 3, 2, 1],
+          [18, 3, 2, 1],
+          [10, 5, 11, 1]
         ]);
         break;
     }
   }
 
   private drawFace(
-    hero: ResolvedHero,
+    _hero: ResolvedHero,
     paint: (color: string, rects: Rect[]) => void,
     dots: (color: string, points: Array<[number, number]>) => void
   ): void {
-    if (hero.hair.shape === 'mural') {
-      paint(hero.outfit.trim, [[10, 7, 8, 2]]);
-      dots(this.face, [
-        [11, 8],
-        [12, 8],
-        [15, 8],
-        [16, 8],
-        [13, 10],
-        [14, 10]
-      ]);
-      return;
-    }
-
     dots(this.face, [
-      [11, 7],
-      [16, 7],
       [13, 8],
-      [12, 10],
-      [13, 10],
-      [14, 10],
-      [15, 10]
+      [14, 8],
+      [18, 8],
+      [19, 8],
+      [16, 10],
+      [14, 11],
+      [15, 11],
+      [16, 11],
+      [17, 11]
     ]);
 
     dots(this.eye, [
-      [12, 7],
-      [15, 7]
+      [14, 8],
+      [18, 8]
     ]);
   }
 }

@@ -3,7 +3,7 @@
     <div class="hero-backdrop"></div>
     <div class="hero-overlay"></div>
 
-    <div class="splash-layout">
+    <div class="splash-home">
       <div class="splash-copy">
         <p class="eyebrow">RETRO LEARNING QUEST</p>
         <h1>CHRONICLE HOLLOW</h1>
@@ -25,94 +25,113 @@
           </p>
         </div>
 
-        <button class="play-btn" type="button" appUiBlip (click)="start()">PLAY</button>
-      </div>
+        <div class="splash-action-stack">
+          <button class="play-btn" type="button" appUiBlip (click)="start()">PLAY</button>
+          <button class="btn splash-secondary-btn" type="button" appUiBlip (click)="openCreator()">SELECCI&Oacute;N DE PERSONAJE</button>
+        </div>
 
-      <aside class="text-frame creator-panel">
-        <div class="creator-header">
+        <div class="splash-hero-chip">
+          <img class="splash-hero-preview" [src]="heroPreview" alt="Vista previa de Ghost">
           <div>
-            <p class="eyebrow">PERSONAJE</p>
-            <h3>Creaci&oacute;n De Personaje</h3>
-          </div>
-          <div class="creator-status-chip">{{ heroStatus }}</div>
-        </div>
-
-        <div class="creator-stage">
-          <div class="creator-glow"></div>
-          <img class="creator-sans" [src]="guidePreview" alt="Sans">
-          <img class="creator-hero" [src]="heroPreview" alt="Hero preview">
-        </div>
-
-        <div class="creator-copy">
-          <p class="micro-label">PREVIEW ACTIVO</p>
-          <p>
-            Si no creas uno, entra el protagonista predeterminado del mural.
-            Si eliges pelo, ropa y tono de piel, ese mismo pixelart aparece luego al lado de Sans.
-          </p>
-        </div>
-
-        <div class="creator-group">
-          <p class="micro-label">PELO</p>
-          <div class="creator-options">
-            <button
-              *ngFor="let option of hairOptions"
-              type="button"
-              class="creator-option"
-              appUiBlip
-              [class.active]="draft.hair === option.id"
-              (click)="selectHair(option.id)">
-              <span
-                class="creator-swatch"
-                [style.--swatch-main]="option.preview"
-                [style.--swatch-alt]="option.secondary || option.preview"></span>
-              <span>{{ option.label }}</span>
-            </button>
+            <p class="micro-label">PERSONAJE ACTUAL</p>
+            <strong>{{ heroStatus }}</strong>
+            <p class="terminal-subtitle">Puedes entrar directo o abrir el men&uacute; dedicado para cambiar ropa, pelo y tono de piel.</p>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
 
-        <div class="creator-group">
-          <p class="micro-label">ROPA</p>
-          <div class="creator-options">
-            <button
-              *ngFor="let option of outfitOptions"
-              type="button"
-              class="creator-option"
-              appUiBlip
-              [class.active]="draft.outfit === option.id"
-              (click)="selectOutfit(option.id)">
-              <span
-                class="creator-swatch"
-                [style.--swatch-main]="option.preview"
-                [style.--swatch-alt]="option.secondary || option.preview"></span>
-              <span>{{ option.label }}</span>
-            </button>
-          </div>
+  <section *ngIf="screen === 'creator'" class="panel creator-screen">
+    <div class="hero-backdrop"></div>
+    <div class="hero-overlay"></div>
+
+    <div class="creator-shell">
+      <aside class="creator-side">
+        <div class="creator-side-copy">
+          <p class="eyebrow">PERSONAJE</p>
+          <h3>Forja de Ghost</h3>
+          <p class="terminal-subtitle">Mueve la selecci&oacute;n por categor&iacute;as y deja al protagonista listo antes de entrar al mapa.</p>
         </div>
 
-        <div class="creator-group">
-          <p class="micro-label">TONO DE PIEL</p>
-          <div class="creator-options">
-            <button
-              *ngFor="let option of skinOptions"
-              type="button"
-              class="creator-option"
-              appUiBlip
-              [class.active]="draft.skin === option.id"
-              (click)="selectSkin(option.id)">
-              <span
-                class="creator-swatch"
-                [style.--swatch-main]="option.preview"
-                [style.--swatch-alt]="option.secondary || option.preview"></span>
-              <span>{{ option.label }}</span>
-            </button>
-          </div>
+        <div class="creator-rail">
+          <button
+            *ngFor="let category of creatorCategories"
+            type="button"
+            class="creator-rail-btn"
+            appUiBlip
+            [class.active]="activeCategory === category.id"
+            (click)="setCreatorCategory(category.id)">
+            <span class="creator-rail-icon">{{ category.short }}</span>
+            <span class="creator-rail-label">{{ category.label }}</span>
+          </button>
         </div>
 
-        <div class="creator-actions">
+        <div class="creator-side-actions">
           <button class="btn" type="button" appUiBlip (click)="useDefaultHero()">USAR PREDETERMINADO</button>
-          <p class="terminal-subtitle">Puedes entrar directo con PLAY o dejar tu personaje listo antes de empezar.</p>
+          <button class="btn" type="button" appUiBlip (click)="closeCreator()">VOLVER</button>
         </div>
       </aside>
+
+      <div class="creator-workbench">
+        <section class="text-frame creator-preview-panel">
+          <div class="creator-preview-stage">
+            <div class="creator-glow"></div>
+            <div class="creator-preview-halo"></div>
+            <img class="creator-guide-holo" [src]="guidePreview" alt="Gu&iacute;a Sans">
+            <img class="creator-hero-large" [src]="heroPreview" alt="Vista previa de Ghost">
+          </div>
+
+          <div class="creator-preview-meta">
+            <div>
+              <p class="micro-label">ESTADO</p>
+              <strong>{{ heroStatus }}</strong>
+            </div>
+            <div>
+              <p class="micro-label">PELO</p>
+              <strong>{{ currentHairLabel }}</strong>
+            </div>
+            <div>
+              <p class="micro-label">ROPA</p>
+              <strong>{{ currentOutfitLabel }}</strong>
+            </div>
+            <div>
+              <p class="micro-label">PIEL</p>
+              <strong>{{ currentSkinLabel }}</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="text-frame creator-selection-panel">
+          <p class="eyebrow">{{ currentCreatorCategory.eyebrow }}</p>
+          <h2 class="creator-section-title">{{ currentCreatorCategory.label }}</h2>
+          <p class="lead creator-section-copy">{{ currentCreatorCategory.description }}</p>
+
+          <div class="creator-option-list">
+            <button
+              *ngFor="let option of currentCreatorOptions"
+              type="button"
+              class="creator-option creator-option-large"
+              appUiBlip
+              [class.active]="isCreatorOptionActive(option.id)"
+              (click)="selectCreatorOption(option.id)">
+              <span
+                class="creator-swatch"
+                [style.--swatch-main]="option.preview"
+                [style.--swatch-alt]="option.secondary || option.preview"></span>
+              <span class="creator-option-copy">
+                <strong>{{ option.label }}</strong>
+                <small>{{ currentCreatorCategory.label }} listo para aplicar</small>
+              </span>
+            </button>
+          </div>
+
+          <div class="creator-launch-row">
+            <button class="btn" type="button" appUiBlip (click)="closeCreator()">GUARDAR Y VOLVER</button>
+            <button class="btn primary creator-play-btn" type="button" appUiBlip (click)="start()">JUGAR AHORA</button>
+          </div>
+        </section>
+      </div>
     </div>
   </section>
 
