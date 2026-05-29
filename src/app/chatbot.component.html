@@ -24,8 +24,15 @@
   </div>
 
   <div class="option-grid">
-    <button *ngFor="let option of currentOptions" type="button" class="option-btn" appUiBlip (click)="select(option)">
-      {{ option.label }}
+    <button
+      *ngFor="let option of currentOptions"
+      type="button"
+      class="option-btn"
+      [class.option-btn-branch]="option.children?.length"
+      appUiBlip
+      (click)="select(option)">
+      <span class="option-label">{{ option.label }}</span>
+      <span *ngIf="option.children?.length" class="option-branch">SUBMENU</span>
     </button>
   </div>
 

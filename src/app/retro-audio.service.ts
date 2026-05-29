@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Tone } from './story.models';
 
 type VoiceProfile = 'guide' | 'hero' | 'terminal';
 type ToneProfile = VoiceProfile | 'ui';
@@ -62,6 +63,30 @@ export class RetroAudioService {
     this.playTone('ui');
   }
 
+  playZoneCue(tone: Tone): void {
+    const bases: Record<Tone, number[]> = {
+      gold: [420, 560, 690],
+      cyan: [360, 470, 620],
+      rose: [390, 520, 660],
+      lime: [340, 430, 590],
+      violet: [310, 430, 580]
+    };
+
+    this.playSequence(bases[tone], 0.055, 0.012, 'square');
+  }
+
+  playRewardBurst(tone: Tone): void {
+    const bases: Record<Tone, number[]> = {
+      gold: [480, 620, 820],
+      cyan: [430, 570, 760],
+      rose: [450, 610, 790],
+      lime: [400, 540, 710],
+      violet: [370, 520, 700]
+    };
+
+    this.playSequence(bases[tone], 0.07, 0.016, 'triangle');
+  }
+
   private playTone(profile: ToneProfile): void {
     const context = this.readyContext();
     if (!context) {
@@ -86,6 +111,57 @@ export class RetroAudioService {
 
     oscillator.start(now);
     oscillator.stop(now + config.duration + 0.01);
+  }
+
+  private playSequence(
+    frequencies: number[],
+    duration: number,
+    volume: number,
+    type: OscillatorType
+  ): void {
+    const context = this.readyContext();
+    if (!context) {
+      return;
+    }
+
+    const startAt = context.currentTime;
+    frequencies.forEach((frequency, index) => {
+      this.scheduleTone(context, {
+        startAt: startAt + index * (duration * 0.74),
+        frequency,
+        duration,
+        type,
+        volume
+      });
+    });
+  }
+
+  private scheduleTone(
+    context: AudioContext,
+    params: {
+      startAt: number;
+      frequency: number;
+      duration: number;
+      type: OscillatorType;
+      volume: number;
+    }
+  ): void {
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+
+    oscillator.type = params.type;
+    oscillator.frequency.setValueAtTime(params.frequency, params.startAt);
+    oscillator.frequency.linearRampToValueAtTime(params.frequency + 28, params.startAt + params.duration);
+
+    gain.gain.setValueAtTime(0.0001, params.startAt);
+    gain.gain.linearRampToValueAtTime(params.volume, params.startAt + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, params.startAt + params.duration);
+
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+
+    oscillator.start(params.startAt);
+    oscillator.stop(params.startAt + params.duration + 0.01);
   }
 
   private readyContext(): AudioContext | null {

@@ -20,91 +20,27 @@
     </article>
   </header>
 
-  <div class="main-grid">
-    <div class="stage-panel">
-      <div class="stage" [ngClass]="'zone-' + current.vibe">
-        <div class="zone-badge">
-          <span>{{ current.zone }}</span>
-          <strong>{{ current.subtitle }}</strong>
-        </div>
-
-        <div class="text-frame stage-copy">
-          <p class="micro-label">OBJETIVO</p>
-          <p>{{ current.objective }}</p>
-        </div>
-
-        <img class="pixel-sprite hero-sprite" [src]="heroSprite" alt="Sprite de Ghost">
-        <img class="pixel-sprite guide-sprite" [src]="guideSprite" alt="Sprite de Sans">
-        <img class="pixel-sprite save-star" [src]="starSprite" alt="Estrella de guardado">
-        <img class="pixel-sprite artifact artifact-arcade" [src]="arcadeSprite" alt="Cabina arcade">
-        <img class="pixel-sprite artifact artifact-cyan" [src]="cyanOrb" alt="Orbe cian">
-        <img class="pixel-sprite artifact artifact-rose" [src]="roseOrb" alt="Orbe rosa">
-      </div>
+  <section class="quick-jump-shell">
+    <div class="quick-jump-header">
+      <p class="micro-label">RUTA DEL RECORRIDO</p>
+      <p class="terminal-subtitle">Las zonas futuras se desbloquean una por una.</p>
     </div>
 
-    <aside class="lesson-grid">
-      <article class="card">
-        <p class="micro-label">SALA ACTIVA</p>
-        <h3>{{ current.title }}</h3>
-        <p>{{ current.summary }}</p>
-      </article>
-
-      <article class="card">
-        <p class="micro-label">LO QUE APRENDES</p>
-        <ul class="learn-list">
-          <li *ngFor="let item of current.learnings">{{ item }}</li>
-        </ul>
-      </article>
-
-      <article class="card">
-        <p class="micro-label">PUNTOS CLAVE</p>
-        <div class="spotlight-list">
-          <div *ngFor="let item of current.spotlight" class="spotlight-item" [ngClass]="'tone-' + item.tone">
-            <span>{{ item.label }}</span>
-            <strong>{{ item.value }}</strong>
-          </div>
-        </div>
-      </article>
-
-      <article class="card">
-        <p class="micro-label">RUTA</p>
-        <div class="timeline">
-          <button
-            *ngFor="let chapter of chapters; let i = index"
-            type="button"
-            class="timeline-node"
-            appUiBlip
-            [class.active]="i === step"
-            (click)="jumpTo(i)">
-            {{ i + 1 }}
-          </button>
-        </div>
-      </article>
-    </aside>
-  </div>
-
-  <div class="dialog-panel">
-    <div class="speaker-box">
-      <div class="portrait-frame">
-        <img class="portrait-image" [src]="speakerPortrait" [alt]="'Retrato de ' + current.speakerName">
-      </div>
-      <div class="speaker-meta">
-        <span class="micro-label">CHATBOT</span>
-        <strong>{{ current.speakerName }}</strong>
-      </div>
+    <div class="quick-jump-strip">
+      <button
+        *ngFor="let chapter of chapters; let i = index"
+        type="button"
+        class="quick-jump-node"
+        appUiBlip
+        [class.active]="isCurrent(chapter.id)"
+        [class.visited]="isVisited(chapter.id)"
+        [disabled]="!canJumpTo(i)"
+        (click)="jumpTo(i)">
+        <span>{{ i + 1 }}</span>
+        <strong>{{ chapter.zone }}</strong>
+      </button>
     </div>
-
-    <div class="text-frame dialog-box">
-      <div class="dialog-name">{{ current.speakerName }} // {{ current.zone }}</div>
-      <app-typewriter-text
-        [text]="current.dialogue"
-        [replayKey]="current.id"
-        [charDelay]="18"
-        [startDelay]="85"
-        [soundProfile]="current.speaker"></app-typewriter-text>
-      <p class="dialog-help">Usa el terminal de abajo si quieres profundizar sin salir del recorrido.</p>
-    </div>
-  </div>
+  </section>
 
   <div class="control-row">
     <button class="btn" type="button" appUiBlip (click)="previous()" [disabled]="step === 0">ATR&Aacute;S</button>
@@ -112,5 +48,268 @@
     <button class="btn primary" type="button" appUiBlip (click)="next()">{{ nextLabel }}</button>
   </div>
 
-  <app-chatbot [zone]="current.zone" [chapter]="current"></app-chatbot>
+  <div class="game-layout">
+    <div class="experience-column">
+      <div class="stage-panel">
+        <div class="stage" [ngClass]="'zone-' + current.vibe">
+          <div class="stage-atmosphere"></div>
+          <div class="stage-noise"></div>
+          <div class="stage-scanlines"></div>
+          <div class="stage-flicker"></div>
+          <div class="stage-particles">
+            <span class="ambient-bit bit-1"></span>
+            <span class="ambient-bit bit-2"></span>
+            <span class="ambient-bit bit-3"></span>
+            <span class="ambient-bit bit-4"></span>
+            <span class="ambient-bit bit-5"></span>
+          </div>
+
+          <div *ngIf="zoneIntroOpen && introChapter" class="zone-intro-overlay">
+            <span class="micro-label">ENTRADA DE ZONA</span>
+            <h3>{{ introChapter.zone }}</h3>
+            <p>{{ introChapter.title }}</p>
+            <strong>{{ introChapter.encounter.title }}</strong>
+          </div>
+
+          <div *ngIf="relicRewardOpen && rewardChapter" class="relic-reward-banner">
+            <img class="relic-reward-sprite" [src]="relicSprites[rewardChapter.id]" [alt]="'Sprite de ' + rewardChapter.archive.relic">
+            <div>
+              <span class="micro-label">RELIQUIA OBTENIDA</span>
+              <strong>{{ rewardChapter.archive.relic }}</strong>
+              <p>{{ rewardChapter.archive.relicType }} / {{ rewardChapter.archive.pulse }}</p>
+            </div>
+          </div>
+
+          <div *ngIf="secretToastOpen && activeSecret" class="secret-toast-banner">
+            <span class="micro-label">SEÑAL OCULTA</span>
+            <strong>{{ activeSecret.title }}</strong>
+            <p>{{ activeSecret.zone }} ahora tiene una ruta secreta registrada en la run.</p>
+          </div>
+
+          <div class="zone-badge">
+            <span>{{ current.zone }}</span>
+            <strong>{{ current.subtitle }}</strong>
+          </div>
+
+          <div class="text-frame stage-copy">
+            <p class="micro-label">OBJETIVO</p>
+            <p>{{ current.objective }}</p>
+          </div>
+
+          <img class="pixel-sprite hero-sprite" [src]="heroSprite" alt="Sprite de Ghost">
+          <img class="pixel-sprite guide-sprite" [src]="guideSprite" alt="Sprite de Sans">
+          <img class="pixel-sprite save-star" [src]="starSprite" alt="Estrella de guardado">
+          <img class="pixel-sprite artifact artifact-arcade" [src]="arcadeSprite" alt="Cabina arcade">
+          <img class="pixel-sprite artifact artifact-cyan" [src]="cyanOrb" alt="Orbe cian">
+          <img class="pixel-sprite artifact artifact-rose" [src]="roseOrb" alt="Orbe rosa">
+          <img class="pixel-sprite artifact artifact-gold" [src]="goldOrb" alt="Orbe dorado">
+          <img class="pixel-sprite artifact artifact-lime" [src]="limeOrb" alt="Orbe lima">
+
+          <button type="button" class="backpack-trigger" appUiBlip (click)="toggleBackpack()">
+            <img [src]="backpackSprite" alt="Mochila de reliquias">
+            <div>
+              <span class="micro-label">MOCHILA</span>
+              <strong>{{ unlockedChapters.length }} / {{ chapters.length }}</strong>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <section class="lesson-grid compact-lessons">
+        <article class="card">
+          <p class="micro-label">SALA ACTIVA</p>
+          <h3>{{ current.title }}</h3>
+          <p>{{ current.summary }}</p>
+        </article>
+
+        <article class="card">
+          <p class="micro-label">LO QUE APRENDES</p>
+          <ul class="learn-list">
+            <li *ngFor="let item of current.learnings">{{ item }}</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <p class="micro-label">PUNTOS CLAVE</p>
+          <div class="spotlight-list">
+            <div *ngFor="let item of current.spotlight" class="spotlight-item" [ngClass]="'tone-' + item.tone">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.value }}</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="card event-card" [class.complete]="currentEncounterComplete">
+          <div class="event-card-top">
+            <div>
+              <p class="micro-label">EVENTO EXCLUSIVO</p>
+              <h3>{{ current.encounter.title }}</h3>
+            </div>
+            <div class="event-progress-chip">
+              <span>ACCIONES</span>
+              <strong>{{ currentEncounterActionsDone }} / {{ current.encounter.steps.length }}</strong>
+            </div>
+          </div>
+
+          <p>{{ currentEncounterCopy }}</p>
+
+          <div class="event-card-bottom">
+            <div class="event-reward-copy">
+              <span class="micro-label">RECOMPENSA</span>
+              <strong>{{ current.encounter.reward }}</strong>
+            </div>
+
+            <button
+              *ngIf="!currentEncounterComplete"
+              type="button"
+              class="btn primary"
+              appUiBlip
+              (click)="advanceEncounter()">
+              {{ currentEncounterActionLabel }}
+            </button>
+
+            <div *ngIf="currentEncounterComplete" class="event-complete-chip">
+              <span class="micro-label">ESTADO</span>
+              <strong>EVENTO COMPLETO</strong>
+            </div>
+          </div>
+        </article>
+      </section>
+    </div>
+
+    <aside class="intel-column">
+      <section class="card intel-panel">
+        <div class="intel-panel-top">
+          <div>
+            <p class="micro-label">DOSSIER DE SALA</p>
+            <h3>{{ archiveFocusChapter.zone }}</h3>
+          </div>
+          <p class="terminal-subtitle">{{ visitedCount }} / {{ chapters.length }} zonas registradas</p>
+        </div>
+
+        <div class="intel-signal-strip">
+          <div class="intel-signal-block">
+            <span class="micro-label">PULSO</span>
+            <strong>{{ archiveFocusChapter.archive.pulse }}</strong>
+          </div>
+          <div class="intel-signal-block">
+            <span class="micro-label">SIGUIENTE</span>
+            <strong>{{ nextUnlock?.zone || 'ARCHIVO COMPLETO' }}</strong>
+          </div>
+        </div>
+
+        <div class="intel-panel-body panel-scroll dossier-stack">
+          <div class="dossier-strip">
+            <div>
+              <span class="micro-label">RELIQUIA</span>
+              <strong>{{ archiveFocusChapter.archive.relic }}</strong>
+            </div>
+            <div>
+              <span class="micro-label">PULSO</span>
+              <strong>{{ archiveFocusChapter.archive.pulse }}</strong>
+            </div>
+          </div>
+
+          <div class="dossier-copy-block">
+            <p class="micro-label">SECRETO</p>
+            <p>{{ archiveFocusChapter.archive.secret }}</p>
+          </div>
+
+          <div class="dossier-copy-block">
+            <p class="micro-label">ECO MODERNO</p>
+            <p>{{ archiveFocusChapter.archive.modernEcho }}</p>
+          </div>
+
+          <div class="dossier-copy-block">
+            <p class="micro-label">RECOMENDACIÓN</p>
+            <p>{{ archiveFocusChapter.archive.recommendation }}</p>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <section *ngIf="backpackOpen" class="backpack-modal-backdrop" (click)="closeBackpack()">
+    <div class="backpack-modal" (click)="$event.stopPropagation()">
+      <div class="backpack-vault-header">
+        <div>
+          <p class="micro-label">MOCHILA DE RELIQUIAS</p>
+          <h3>Colección del recorrido</h3>
+        </div>
+        <button type="button" class="btn" appUiBlip (click)="closeBackpack()">CERRAR</button>
+      </div>
+
+      <div class="backpack-modal-grid">
+        <div class="backpack-collection-pane">
+          <button
+            *ngFor="let chapter of unlockedChapters"
+            type="button"
+            class="relic-sprite-card"
+            appUiBlip
+            [class.active]="archiveFocusChapter.id === chapter.id"
+            [ngClass]="'tone-' + chapter.vibe"
+            (click)="focusArchive(chapter.id)">
+            <img [src]="relicSprites[chapter.id]" [alt]="'Sprite de ' + chapter.archive.relic">
+            <span>{{ chapter.archive.relicType }}</span>
+            <strong>{{ chapter.archive.relic }}</strong>
+          </button>
+        </div>
+
+        <div class="backpack-detail-panel">
+          <div class="backpack-detail-hero">
+            <img [src]="relicSprites[archiveFocusChapter.id]" [alt]="'Sprite de ' + archiveFocusChapter.archive.relic">
+            <div>
+              <p class="micro-label">{{ archiveFocusChapter.archive.relicType }}</p>
+              <h3>{{ archiveFocusChapter.archive.relic }}</h3>
+              <p>{{ archiveFocusChapter.archive.pulse }}</p>
+            </div>
+          </div>
+
+          <div class="dossier-copy-block">
+            <p class="micro-label">SECRETO</p>
+            <p>{{ archiveFocusChapter.archive.secret }}</p>
+          </div>
+
+          <div class="dossier-copy-block">
+            <p class="micro-label">ECO MODERNO</p>
+            <p>{{ archiveFocusChapter.archive.modernEcho }}</p>
+          </div>
+
+          <div class="dossier-copy-block">
+            <p class="micro-label">RECOMENDACIÓN</p>
+            <p>{{ archiveFocusChapter.archive.recommendation }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dialog-stack">
+    <div class="dialog-panel">
+      <div class="speaker-box">
+        <div class="portrait-frame">
+          <img class="portrait-image" [src]="speakerPortrait" [alt]="'Retrato de ' + current.speakerName">
+        </div>
+        <div class="speaker-meta">
+          <span class="micro-label">CHATBOT</span>
+          <strong>{{ current.speakerName }}</strong>
+        </div>
+      </div>
+
+      <div class="text-frame dialog-box">
+        <div class="dialog-name">{{ current.speakerName }} // {{ current.zone }}</div>
+        <app-typewriter-text
+          [text]="current.dialogue"
+          [replayKey]="current.id"
+          [charDelay]="18"
+          [startDelay]="85"
+          [soundProfile]="current.speaker"></app-typewriter-text>
+        <p class="dialog-help">Usa el terminal de abajo para profundizar sin romper el ritmo del recorrido.</p>
+      </div>
+    </div>
+
+    <div class="dialog-chatbot">
+      <app-chatbot [zone]="current.zone" [chapter]="current" (secretUnlocked)="registerSecret($event)"></app-chatbot>
+    </div>
+  </section>
 </section>

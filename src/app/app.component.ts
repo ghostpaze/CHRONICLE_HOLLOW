@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CharacterConfig, CharacterOption, SpriteService } from './sprite.service';
+import { GAME_CHAPTERS, RunReport } from './story.models';
 
 type Screen = 'splash' | 'creator' | 'game' | 'end';
 type CreatorCategory = 'outfit' | 'hair' | 'skin';
@@ -10,6 +11,12 @@ interface CreatorCategoryItem {
   short: string;
   eyebrow: string;
   description: string;
+}
+
+interface LandingFeature {
+  eyebrow: string;
+  title: string;
+  copy: string;
 }
 
 @Component({
@@ -25,6 +32,25 @@ export class AppComponent implements OnInit {
   heroPreview = '';
   guidePreview = '';
   heroStatus = 'Predeterminado';
+  lastRunReport: RunReport | null = null;
+  readonly routePreview = GAME_CHAPTERS;
+  readonly landingFeatures: LandingFeature[] = [
+    {
+      eyebrow: 'SISTEMA',
+      title: 'Archivo desbloqueable',
+      copy: 'Cada zona deja una reliquia, una idea fuerte y una pista para seguir leyendo el medio.'
+    },
+    {
+      eyebrow: 'RITMO',
+      title: 'Mapa con progresion',
+      copy: 'La ruta avanza como una expedicion: entras, registras, vuelves y conectas lo que viste.'
+    },
+    {
+      eyebrow: 'IDENTIDAD',
+      title: 'Build + museo',
+      copy: 'Personaje, terminal y cierre trabajan juntos para que la pagina tenga mundo propio.'
+    }
+  ];
   readonly creatorCategories: CreatorCategoryItem[] = [
     {
       id: 'outfit',
@@ -77,12 +103,62 @@ export class AppComponent implements OnInit {
     this.screen = 'splash';
   }
 
-  finish(): void {
+  finish(report: RunReport): void {
+    this.lastRunReport = report;
     this.screen = 'end';
   }
 
   restart(): void {
     this.screen = 'splash';
+  }
+
+  get heroBuildSummary(): string {
+    return `${this.currentOutfitLabel} / ${this.currentHairLabel} / ${this.currentSkinLabel}`;
+  }
+
+  get clearedZonesLabel(): string {
+    const count = this.lastRunReport?.visitedZones.length ?? 0;
+    return `${count}/${this.routePreview.length}`;
+  }
+
+  get relicCountLabel(): string {
+    return `${this.lastRunReport?.relicsUnlocked.length ?? 0}`;
+  }
+
+  get secretCountLabel(): string {
+    return `${this.lastRunReport?.secretFinds.length ?? 0}`;
+  }
+
+  get eventCountLabel(): string {
+    return `${this.lastRunReport?.eventsCompleted.length ?? 0}`;
+  }
+
+  get finalRunTitle(): string {
+    return this.lastRunReport?.playerTitle ?? 'EXPLORADOR DEL ARCHIVO';
+  }
+
+  get finalRunMessage(): string {
+    return this.lastRunReport?.finalMessage ??
+      'El recorrido quedó completo, pero aún guarda capas para otra vuelta.';
+  }
+
+  get finalRunCardLine(): string {
+    return [
+      this.finalRunTitle,
+      `${this.clearedZonesLabel} ZONAS`,
+      `${this.relicCountLabel} RELIQUIAS`,
+      `${this.secretCountLabel} SECRETOS`
+    ].join(' // ');
+  }
+
+  get finalZoneLabel(): string {
+    const id = this.lastRunReport?.finalChapterId;
+    return this.routePreview.find((chapter) => chapter.id === id)?.zone ?? 'ARCHIVO FINAL';
+  }
+
+  get hasPerfectArchive(): boolean {
+    return (this.lastRunReport?.secretFinds.length ?? 0) === this.routePreview.length &&
+      (this.lastRunReport?.eventsCompleted.length ?? 0) === this.routePreview.length;
   }
 
   selectHair(id: string): void {

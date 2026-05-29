@@ -1,13 +1,22 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { RetroAudioService } from './retro-audio.service';
 import { SpriteService } from './sprite.service';
-import { Chapter } from './story.models';
+import { Chapter, RunSecretLog } from './story.models';
 
 interface OptionNode {
   id: string;
   label: string;
   response?: string;
   children?: OptionNode[];
-  action?: 'reset';
+}
+
+interface SecretRouteConfig {
+  id: string;
+  title: string;
+  sequence: string[];
+  response: string;
+  reveal: string;
+  echo: string;
 }
 
 @Component({
@@ -17,6 +26,7 @@ interface OptionNode {
 export class ChatbotComponent implements OnInit, OnChanges {
   @Input() zone = '';
   @Input() chapter: Chapter | null = null;
+  @Output() secretUnlocked = new EventEmitter<RunSecretLog>();
 
   readonly name = 'SANS';
   readonly zonePrompts: Record<string, string> = {
@@ -28,14 +38,77 @@ export class ChatbotComponent implements OnInit, OnChanges {
     'INDIE FORGE': 'Esta terminal se centra en voz autoral, riesgo creativo e identidad propia.',
     'NEXT BIT': 'Aqu\u00ed miramos el futuro del medio: accesibilidad, interfaces nuevas y preservaci\u00f3n.'
   };
+  readonly secretRoutes: Record<string, SecretRouteConfig> = {
+    'PROTO ROOM': {
+      id: 'secret-proto-room',
+      title: 'Bitácora Delta 72',
+      sequence: ['room-spotlight', 'proto-experiments-games-proof', 'proto-legacy-reading'],
+      response: 'La bitácora oculta revela que el origen del videojuego no es solo técnico: es el momento en que una máquina aprende a provocar insistencia.',
+      reveal: 'La secuencia conecta datos, prototipo y legado para demostrar que la claridad del input fue la verdadera primera magia.',
+      echo: 'Cada juego contemporáneo que responde limpio y rápido sigue trabajando con la misma promesa del Delta 72.'
+    },
+    'ARCADE CORE': {
+      id: 'secret-arcade-core',
+      title: 'Tabla Fantasma',
+      sequence: ['arcade-culture-score-status', 'arcade-economy-loop', 'arcade-icons-afterlife'],
+      response: 'La tabla fantasma registra algo clave: el arcade no vendía duración, vendía el derecho a ser recordado por una sala entera.',
+      reveal: 'Prestigio, ritmo y legado forman un mismo circuito. La economía del arcade siempre estuvo amarrada a la memoria social.',
+      echo: 'Leaderboards, clips y speedruns siguen actuando como esa tabla invisible que convierte jugar en presencia pública.'
+    },
+    'HOME PORT': {
+      id: 'secret-home-port',
+      title: 'Memory Core',
+      sequence: ['home-rhythm-change-save', 'home-franchises-icons', 'home-hardware-control'],
+      response: 'La memoria secreta de esta sala muestra que el hogar no solo expandió contenido: hizo que el videojuego conviviera contigo.',
+      reveal: 'Guardar, recordar personajes y aprender un mando propio forman la tríada que convierte una consola en compañía cotidiana.',
+      echo: 'Todo juego al que regresas por apego, y no solo por reto, sigue respondiendo al pulso de este Memory Core.'
+    },
+    'GENRE VAULT': {
+      id: 'secret-genre-vault',
+      title: 'Matriz de Híbridos',
+      sequence: ['genre-emotions-compare-focus', 'genre-rules-design', 'genre-hybrids-works'],
+      response: 'La matriz secreta confirma que los géneros valen más como motores de emoción que como cajas de catálogo.',
+      reveal: 'Comparar acción, reglas y mezcla deja ver cuándo un sistema cambia de verdad la sensación central del jugador.',
+      echo: 'Los juegos más memorables de hoy suelen destacar cuando usan géneros como instrumentos, no como límites.'
+    },
+    'METROID DEPTHS': {
+      id: 'secret-metroid-depths',
+      title: 'Plano de Retorno',
+      sequence: ['metroid-map-memory-marks', 'metroid-return-gating', 'metroid-library-modern'],
+      response: 'El plano oculto demuestra que el metroidvania no solo premia avanzar: premia recordar mejor que antes.',
+      reveal: 'Mapa, bloqueo y reinterpretación moderna forman una misma lección sobre memoria espacial convertida en recompensa.',
+      echo: 'Cada atajo memorable y cada compuerta abierta tarde siguen obedeciendo al mismo plano de retorno.'
+    },
+    'INDIE FORGE': {
+      id: 'secret-indie-forge',
+      title: 'Sello de Taller',
+      sequence: ['indie-voice-feeling-filters', 'indie-risk-limits', 'indie-recommendations-atmosphere'],
+      response: 'El sello oculto de esta sala dice que muchas obras indie brillan porque podan sin miedo hasta dejar la voz al desnudo.',
+      reveal: 'Sensibilidad, límite y atmósfera se alinean aquí como prueba de que una identidad fuerte no necesita escala gigante.',
+      echo: 'Cuando un juego pequeño te golpea más fuerte que uno enorme, casi siempre hay un Sello de Taller detrás.'
+    },
+    'NEXT BIT': {
+      id: 'secret-next-bit',
+      title: 'Canal de Futuro',
+      sequence: ['next-accessibility-options-access', 'next-interfaces-tools', 'next-preservation-connection'],
+      response: 'El canal secreto deja una idea fija: el futuro gana valor cuando abre acceso y conserva memoria al mismo tiempo.',
+      reveal: 'Accesibilidad, herramientas y preservación no son líneas separadas; juntas dibujan el terreno más serio del próximo salto.',
+      echo: 'Todo sistema que deja entrar a más personas y no borra su pasado ya está transmitiendo en este canal.'
+    }
+  };
 
   rootOptions: OptionNode[] = [];
   guidePortrait = '';
   activeResponse = '';
   responseTick = 0;
   path: OptionNode[] = [];
+  private readonly unlockedSecretIds = new Set<string>();
+  private recentOptionTrail: string[] = [];
 
-  constructor(private sprite: SpriteService) {}
+  constructor(
+    private sprite: SpriteService,
+    private audio: RetroAudioService
+  ) {}
 
   ngOnInit(): void {
     this.guidePortrait = this.sprite.guidePortrait();
@@ -58,8 +131,7 @@ export class ChatbotComponent implements OnInit, OnChanges {
   }
 
   select(option: OptionNode): void {
-    if (option.action === 'reset') {
-      this.home();
+    if (this.tryUnlockSecret(option.id)) {
       return;
     }
 
@@ -89,6 +161,7 @@ export class ChatbotComponent implements OnInit, OnChanges {
   private syncTerminal(): void {
     this.rootOptions = this.buildRootOptions();
     this.path = [];
+    this.recentOptionTrail = [];
     this.setResponse(this.defaultResponse());
   }
 
@@ -108,12 +181,13 @@ export class ChatbotComponent implements OnInit, OnChanges {
   }
 
   private buildRootOptions(): OptionNode[] {
-    const options: OptionNode[] = [this.buildRoomScanOption(), ...this.buildZoneSpecificOptions()];
-    options.push({
-      id: 'reset',
-      label: 'Cerrar terminal',
-      action: 'reset'
-    });
+    const options = [this.buildRoomScanOption(), ...this.buildZoneSpecificOptions()];
+    const secretOption = this.buildUnlockedSecretOption();
+
+    if (secretOption) {
+      options.push(secretOption);
+    }
+
     return options;
   }
 
@@ -145,6 +219,23 @@ export class ChatbotComponent implements OnInit, OnChanges {
           id: 'room-spotlight',
           label: 'Radar r\u00e1pido',
           response: this.buildSpotlightResponse()
+        },
+        {
+          id: 'room-relic',
+          label: 'Reliquia detectada',
+          response: this.buildRelicScanResponse(),
+          children: [
+            {
+              id: 'room-relic-profile',
+              label: 'Ficha de reliquia',
+              response: this.buildRelicProfileResponse()
+            },
+            {
+              id: 'room-relic-echo',
+              label: 'Eco en el presente',
+              response: this.buildRelicEchoResponse()
+            }
+          ]
         }
       ]
     };
@@ -183,7 +274,21 @@ export class ChatbotComponent implements OnInit, OnChanges {
             id: 'proto-experiments-games',
             label: 'Tennis for Two y Spacewar!',
             response:
-              '* Esos prototipos demostraron que una pantalla pod\u00eda responder al jugador en tiempo real. Antes de las grandes sagas, ya exist\u00eda la sensaci\u00f3n de jugar con una m\u00e1quina.'
+              '* Esos prototipos demostraron que una pantalla pod\u00eda responder al jugador en tiempo real. Antes de las grandes sagas, ya exist\u00eda la sensaci\u00f3n de jugar con una m\u00e1quina.',
+            children: [
+              {
+                id: 'proto-experiments-games-proof',
+                label: 'Qu\u00e9 demostraban',
+                response:
+                  '* Demostraban que la interacci\u00f3n ya pod\u00eda producir tensi\u00f3n, competencia y sorpresa sin necesidad de una narrativa enorme alrededor.'
+              },
+              {
+                id: 'proto-experiments-games-legacy',
+                label: 'Por qu\u00e9 siguen vivos',
+                response:
+                  '* Siguen vivos porque fijan una verdad muy temprana: si una acci\u00f3n se entiende al instante y la respuesta es limpia, ya hay juego.'
+              }
+            ]
           },
           {
             id: 'proto-experiments-bases',
@@ -248,7 +353,21 @@ export class ChatbotComponent implements OnInit, OnChanges {
             id: 'arcade-culture-score',
             label: 'High score y prestigio',
             response:
-              '* El puntaje no era solo n\u00famero. Era reputaci\u00f3n, comparaci\u00f3n y motivo para volver. Por eso esta etapa vuelve social algo que parec\u00eda individual.'
+              '* El puntaje no era solo n\u00famero. Era reputaci\u00f3n, comparaci\u00f3n y motivo para volver. Por eso esta etapa vuelve social algo que parec\u00eda individual.',
+            children: [
+              {
+                id: 'arcade-culture-score-status',
+                label: 'Prestigio visible',
+                response:
+                  '* Tu nombre en la tabla convert\u00eda una partida breve en una declaraci\u00f3n p\u00fablica. El score era una forma de estar presente incluso cuando ya no jugabas.'
+              },
+              {
+                id: 'arcade-culture-score-return',
+                label: 'Volver por tu nombre',
+                response:
+                  '* Mucha gente regresaba menos por terminar el juego y m\u00e1s por recuperar un lugar, superar a alguien o defender una marca propia.'
+              }
+            ]
           },
           {
             id: 'arcade-culture-spectacle',
@@ -313,7 +432,21 @@ export class ChatbotComponent implements OnInit, OnChanges {
             id: 'home-rhythm-change',
             label: 'Por qu\u00e9 cambia la experiencia',
             response:
-              '* En casa puedes explorar con calma, guardar progreso y volver ma\u00f1ana. Eso abre espacio para campa\u00f1as largas, secretos y mundos persistentes.'
+              '* En casa puedes explorar con calma, guardar progreso y volver ma\u00f1ana. Eso abre espacio para campa\u00f1as largas, secretos y mundos persistentes.',
+            children: [
+              {
+                id: 'home-rhythm-change-save',
+                label: 'Guardar progreso',
+                response:
+                  '* Guardar cambia la relaci\u00f3n con el error: ya no todo termina en una sola sesi\u00f3n. El juego puede acompa\u00f1arte durante d\u00edas o semanas.'
+              },
+              {
+                id: 'home-rhythm-change-scale',
+                label: 'Tiempo largo',
+                response:
+                  '* El hogar permite dise\u00f1ar mundos con m\u00e1s calma, secretos acumulados y una sensaci\u00f3n de compa\u00f1\u00eda que el arcade rara vez pod\u00eda sostener.'
+              }
+            ]
           },
           {
             id: 'home-rhythm-sharing',
@@ -378,7 +511,21 @@ export class ChatbotComponent implements OnInit, OnChanges {
             id: 'genre-emotions-compare',
             label: 'Acci\u00f3n, puzzle y RPG',
             response:
-              '* Acci\u00f3n pide reflejos, puzzle pide comprensi\u00f3n y RPG pide crecimiento dentro de un mundo. Cada g\u00e9nero reorganiza el tipo de placer que ofrece.'
+              '* Acci\u00f3n pide reflejos, puzzle pide comprensi\u00f3n y RPG pide crecimiento dentro de un mundo. Cada g\u00e9nero reorganiza el tipo de placer que ofrece.',
+            children: [
+              {
+                id: 'genre-emotions-compare-focus',
+                label: 'Qu\u00e9 pide cada uno',
+                response:
+                  '* La acci\u00f3n exige ejecuci\u00f3n, el puzzle exige lectura y el RPG exige permanencia. No solo cambian las reglas: cambia el tipo de atenci\u00f3n que te piden.'
+              },
+              {
+                id: 'genre-emotions-compare-feeling',
+                label: 'Qu\u00e9 emoci\u00f3n domina',
+                response:
+                  '* Un buen g\u00e9nero no se reconoce solo por sus sistemas, sino por la emoci\u00f3n que vuelve constante: urgencia, curiosidad, poder o tensi\u00f3n.'
+              }
+            ]
           },
           {
             id: 'genre-emotions-tension',
@@ -443,7 +590,21 @@ export class ChatbotComponent implements OnInit, OnChanges {
             id: 'metroid-map-memory',
             label: 'Memoria espacial',
             response:
-              '* Este g\u00e9nero recompensa recordar un pasillo raro, una cornisa imposible o una puerta que parec\u00eda in\u00fatil. El mapa se queda contigo.'
+              '* Este g\u00e9nero recompensa recordar un pasillo raro, una cornisa imposible o una puerta que parec\u00eda in\u00fatil. El mapa se queda contigo.',
+            children: [
+              {
+                id: 'metroid-map-memory-marks',
+                label: 'Marcas mentales',
+                response:
+                  '* El jugador empieza a guardar huellas invisibles: esa pared sospechosa, esa altura imposible, ese color raro. El mapa vive tambi\u00e9n fuera de la pantalla.'
+              },
+              {
+                id: 'metroid-map-memory-promises',
+                label: 'Puertas pendientes',
+                response:
+                  '* Cada puerta imposible crea una deuda elegante con el futuro. El juego te ense\u00f1a a recordar porque sabe que luego va a recompensarte por eso.'
+              }
+            ]
           },
           {
             id: 'metroid-map-shortcuts',
@@ -508,7 +669,21 @@ export class ChatbotComponent implements OnInit, OnChanges {
             id: 'indie-voice-feeling',
             label: 'Por qu\u00e9 se sienten personales',
             response:
-              '* Muchos indies transmiten una intenci\u00f3n muy clara porque tienen menos filtros. A veces no buscan impresionar por tama\u00f1o, sino por sensibilidad.'
+              '* Muchos indies transmiten una intenci\u00f3n muy clara porque tienen menos filtros. A veces no buscan impresionar por tama\u00f1o, sino por sensibilidad.',
+            children: [
+              {
+                id: 'indie-voice-feeling-filters',
+                label: 'Menos filtros',
+                response:
+                  '* Cuando hay menos capas de aprobaci\u00f3n, una idea puede conservar mejor su tono original. Eso hace que muchos indies se sientan m\u00e1s directos y honestos.'
+              },
+              {
+                id: 'indie-voice-feeling-sensitivity',
+                label: 'Sensibilidad antes que escala',
+                response:
+                  '* Un indie puede dejar huella sin ser enorme porque concentra su energ\u00eda en una sensaci\u00f3n muy clara, no en abarcarlo todo.'
+              }
+            ]
           },
           {
             id: 'indie-voice-style',
@@ -573,7 +748,21 @@ export class ChatbotComponent implements OnInit, OnChanges {
             id: 'next-accessibility-options',
             label: 'Opciones que cambian todo',
             response:
-              '* Subt\u00edtulos, remapeo, ayudas visuales, dificultad adaptable o lectores de interfaz pueden convertir una barrera en una experiencia posible.'
+              '* Subt\u00edtulos, remapeo, ayudas visuales, dificultad adaptable o lectores de interfaz pueden convertir una barrera en una experiencia posible.',
+            children: [
+              {
+                id: 'next-accessibility-options-access',
+                label: 'Acceso real',
+                response:
+                  '* Una opci\u00f3n de accesibilidad no es adorno. Es la diferencia entre poder entrar al juego o quedarse completamente fuera de la experiencia.'
+              },
+              {
+                id: 'next-accessibility-options-clarity',
+                label: 'Claridad para todos',
+                response:
+                  '* Muchas mejoras pensadas para accesibilidad tambi\u00e9n vuelven el juego m\u00e1s legible y amable para casi cualquier persona.'
+              }
+            ]
           },
           {
             id: 'next-accessibility-design',
@@ -641,6 +830,80 @@ export class ChatbotComponent implements OnInit, OnChanges {
     ];
   }
 
+  private buildUnlockedSecretOption(): OptionNode | null {
+    const config = this.secretRoutes[this.zone];
+    if (!config || !this.unlockedSecretIds.has(config.id)) {
+      return null;
+    }
+
+    return {
+      id: `${config.id}-node`,
+      label: 'Ruta secreta',
+      response: `* ${config.title} desbloqueada. ${config.response}`,
+      children: [
+        {
+          id: `${config.id}-reveal`,
+          label: 'Clave descifrada',
+          response: `* ${config.reveal}`
+        },
+        {
+          id: `${config.id}-echo`,
+          label: 'Eco oculto',
+          response: `* ${config.echo}`
+        }
+      ]
+    };
+  }
+
+  private tryUnlockSecret(optionId: string): boolean {
+    const config = this.secretRoutes[this.zone];
+    if (!config || this.unlockedSecretIds.has(config.id)) {
+      return false;
+    }
+
+    const selectedOption = this.findOptionById(optionId, this.rootOptions);
+    if (selectedOption?.children?.length) {
+      return false;
+    }
+
+    this.recentOptionTrail = [...this.recentOptionTrail, optionId].slice(-config.sequence.length);
+    const matches = config.sequence.every((id, index) => this.recentOptionTrail[index] === id);
+
+    if (!matches) {
+      return false;
+    }
+
+    this.unlockedSecretIds.add(config.id);
+    this.rootOptions = this.buildRootOptions();
+    this.path = [];
+    this.recentOptionTrail = [];
+    this.audio.playRewardBurst(this.chapter?.vibe ?? 'gold');
+    this.secretUnlocked.emit({
+      id: config.id,
+      zone: this.chapter?.zone ?? this.zone,
+      title: config.title
+    });
+    this.setResponse(`* Senal oculta descifrada: ${config.title}.\n${config.response}`);
+    return true;
+  }
+
+  private findOptionById(optionId: string, options: OptionNode[]): OptionNode | null {
+    for (const option of options) {
+      if (option.id === optionId) {
+        return option;
+      }
+
+      if (option.children?.length) {
+        const nested = this.findOptionById(optionId, option.children);
+        if (nested) {
+          return nested;
+        }
+      }
+    }
+
+    return null;
+  }
+
   private buildLearningsResponse(): string {
     if (!this.chapter?.learnings.length) {
       return '* Esta sala a\u00fan no tiene aprendizajes registrados.';
@@ -656,6 +919,42 @@ export class ChatbotComponent implements OnInit, OnChanges {
 
     const items = this.chapter.spotlight.map((item) => `${item.label}: ${item.value}`);
     return `* Radar r\u00e1pido de ${this.chapter.zone}:\n- ${items.join('\n- ')}`;
+  }
+
+  private buildRelicScanResponse(): string {
+    if (!this.chapter) {
+      return '* No hay reliquia registrada porque la terminal todav\u00eda no est\u00e1 vinculada a una sala.';
+    }
+
+    return [
+      `* Reliquia registrada: ${this.chapter.archive.relic}.`,
+      `Tipo detectado: ${this.chapter.archive.relicType}.`,
+      `Pulso asociado: ${this.chapter.archive.pulse}.`
+    ].join('\n');
+  }
+
+  private buildRelicProfileResponse(): string {
+    if (!this.chapter) {
+      return '* No hay ficha de reliquia disponible.';
+    }
+
+    return [
+      `* ${this.chapter.archive.relic} pertenece a ${this.chapter.zone}.`,
+      `Archivo base: ${this.chapter.archive.relicType}.`,
+      this.chapter.archive.secret
+    ].join('\n');
+  }
+
+  private buildRelicEchoResponse(): string {
+    if (!this.chapter) {
+      return '* No hay eco moderno registrado para esta reliquia.';
+    }
+
+    return [
+      `* Eco moderno de ${this.chapter.archive.relic}:`,
+      this.chapter.archive.modernEcho,
+      `Lectura sugerida: ${this.chapter.archive.recommendation}`
+    ].join('\n');
   }
 
   private setResponse(text: string): void {

@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Tone } from './story.models';
 
 export interface CharacterOption {
   id: string;
@@ -182,6 +183,102 @@ export class SpriteService {
     customized: false
   };
 
+  private readonly relicPatterns: Record<string, string[]> = {
+    'proto-room': [
+      '....ooooo....',
+      '...ommmmmo...',
+      '..omhhhhhmo..',
+      '.omhhhhhhhmo.',
+      '.omhoooohhmo.',
+      '.omhommohhmo.',
+      '.omhommohhmo.',
+      '.omhoooohhmo.',
+      '.omhhhhhhhmo.',
+      '..omhhhhhmo..',
+      '...omsssmo...',
+      '....ooooo....'
+    ],
+    'arcade-core': [
+      '.....oooo.....',
+      '...oommmmoo...',
+      '..ommmmmmmmo..',
+      '..ommhhhhmmo..',
+      '.ommhgggghmmo.',
+      '.ommhgggghmmo.',
+      '.ommhhhhhhmmo.',
+      '..ommmhhmmmo..',
+      '..ommmhhmmmo..',
+      '...ommmmmmo...',
+      '....oommoo....'
+    ],
+    'home-port': [
+      '....oooooo....',
+      '..oommmmmmoo..',
+      '.ommhhhhhhmmo.',
+      '.omhhhhhhhhmo.',
+      '.omhhgggghhmo.',
+      '.omhhhhhhhhmo.',
+      '.omhhhhhhhhmo.',
+      '.omhhoooohhmo.',
+      '.omhhhhhhhhmo.',
+      '..ommmmmmmmo..',
+      '....oooooo....'
+    ],
+    'genre-vault': [
+      '....oooooo....',
+      '...ommmmmmo...',
+      '..omhhhhhhmo..',
+      '.omhhhmmhhmo..',
+      '.omhhmggmhhmo.',
+      '.omhhmggmhhmo.',
+      '.omhhmmmmhhmo.',
+      '.omhhhhhhhhmo.',
+      '.omhhhmmhhmo..',
+      '..ommmmmmmmo..',
+      '....oooooo....'
+    ],
+    'metroid-depths': [
+      '.....oo.......',
+      '....ommo......',
+      '...omhhmo.....',
+      '..omhhhhmo....',
+      '.omhhgghhmo...',
+      '.omhhgghhmo...',
+      '..omhhhhmo....',
+      '...omhhmo.....',
+      '....ommooooo..',
+      '.....omhhhmmo.',
+      '......ommmmmo.',
+      '.......ooooo..'
+    ],
+    'indie-forge': [
+      '.....oooo.....',
+      '....ommmmo....',
+      '....omhhmo....',
+      '....omhhmo....',
+      '..oomhhhhmoo..',
+      '.omhhgggghhmo.',
+      '.omhhhhhhhhmo.',
+      '..ommmmmmmmo..',
+      '....omhhmo....',
+      '....omhhmo....',
+      '....oooooo....'
+    ],
+    'next-bit': [
+      '.....oooo.....',
+      '...oommmmoo...',
+      '..omhhhhhhmo..',
+      '.omhhgooghmo..',
+      '.omhhgooghmo..',
+      '.omhhhhhhhhmo.',
+      '.omhhmmmmhhmo.',
+      '.omhhmmmmhhmo.',
+      '..omhhhhhhmo..',
+      '...oommmmoo...',
+      '.....oooo.....'
+    ]
+  };
+
   private selectedHero: CharacterConfig | null = null;
   private cache = new Map<string, string>();
 
@@ -352,6 +449,43 @@ export class SpriteService {
       '....mmm....'
     ];
     return this.drawPattern(`orb-${tone}`, pattern, palettes[tone], scale);
+  }
+
+  backpack(scale = 8): string {
+    const palette = {
+      o: '#171118',
+      b: '#3a2b22',
+      m: '#6e4e34',
+      h: '#9c7b55',
+      g: '#f1c65f',
+      s: '#c89a45'
+    };
+    const pattern = [
+      '.....oooo.....',
+      '....obbbo....',
+      '...obmmmbo...',
+      '..obmmmmmbo..',
+      '..obmggmmbo..',
+      '..obmmmmmbo..',
+      '..obmssmmbo..',
+      '..obmmmmmbo..',
+      '..obhhhhmbo..',
+      '...obbbbbo...',
+      '....ooooo....'
+    ];
+    return this.drawPattern('backpack', pattern, palette, scale);
+  }
+
+  relicSprite(relicId: string, tone: Tone, scale = 8): string {
+    const palettes: Record<Tone, Record<string, string>> = {
+      gold: { o: '#171118', m: '#f1c65f', h: '#fff2b8', g: '#f8dfa2', s: '#845223' },
+      cyan: { o: '#171118', m: '#63d8ff', h: '#d8fbff', g: '#91efff', s: '#1d6071' },
+      rose: { o: '#171118', m: '#ff74a0', h: '#ffd6e5', g: '#ffb6cb', s: '#7a2842' },
+      lime: { o: '#171118', m: '#9deb72', h: '#efffd7', g: '#c8f5a9', s: '#496b2b' },
+      violet: { o: '#171118', m: '#a67bff', h: '#eadbff', g: '#c8afff', s: '#4a2e83' }
+    };
+    const pattern = this.relicPatterns[relicId] ?? this.relicPatterns['next-bit'];
+    return this.drawPattern(`relic-${relicId}-${tone}`, pattern, palettes[tone], scale);
   }
 
   private resolveHero(): ResolvedHero {
@@ -730,7 +864,7 @@ export class SpriteService {
 
   private drawFace(
     _hero: ResolvedHero,
-    paint: (color: string, rects: Rect[]) => void,
+    _paint: (color: string, rects: Rect[]) => void,
     dots: (color: string, points: Array<[number, number]>) => void
   ): void {
     dots(this.face, [

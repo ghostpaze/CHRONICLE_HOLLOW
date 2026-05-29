@@ -30,13 +30,45 @@
           <button class="btn splash-secondary-btn" type="button" appUiBlip (click)="openCreator()">SELECCI&Oacute;N DE PERSONAJE</button>
         </div>
 
-        <div class="splash-hero-chip">
-          <img class="splash-hero-preview" [src]="heroPreview" alt="Vista previa de Ghost">
-          <div>
-            <p class="micro-label">PERSONAJE ACTUAL</p>
-            <strong>{{ heroStatus }}</strong>
-            <p class="terminal-subtitle">Puedes entrar directo o abrir el men&uacute; dedicado para cambiar ropa, pelo y tono de piel.</p>
-          </div>
+        <div class="splash-dashboard">
+          <section class="text-frame splash-status-panel">
+            <div class="splash-hero-chip">
+              <img class="splash-hero-preview" [src]="heroPreview" alt="Vista previa de Ghost">
+              <div>
+                <p class="micro-label">PERSONAJE ACTUAL</p>
+                <strong>{{ heroStatus }}</strong>
+                <p class="terminal-subtitle">Puedes entrar directo o abrir el men&uacute; dedicado para cambiar ropa, pelo y tono de piel.</p>
+              </div>
+            </div>
+
+            <div class="signal-list-compact">
+              <article *ngFor="let feature of landingFeatures" class="signal-card">
+                <p class="eyebrow">{{ feature.eyebrow }}</p>
+                <strong>{{ feature.title }}</strong>
+                <p>{{ feature.copy }}</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="text-frame splash-route-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">RUTA CENTRAL</p>
+                <h3>Museo en siete zonas</h3>
+              </div>
+              <p class="terminal-subtitle">
+                Cada parada desbloquea una reliquia distinta. La experiencia crece como sistema, no como una pila de bloques.
+              </p>
+            </div>
+
+            <div class="route-preview-list">
+              <article *ngFor="let chapter of routePreview; let i = index" class="route-preview-node" [ngClass]="'tone-' + chapter.vibe">
+                <span>{{ i + 1 }}</span>
+                <strong>{{ chapter.zone }}</strong>
+                <p>{{ chapter.archive.relic }}</p>
+              </article>
+            </div>
+          </section>
         </div>
       </div>
     </div>
@@ -136,7 +168,7 @@
   </section>
 
   <section *ngIf="screen === 'game'" class="panel game-screen">
-    <app-game (onFinish)="finish()"></app-game>
+    <app-game (onFinish)="finish($event)"></app-game>
   </section>
 
   <section *ngIf="screen === 'end'" class="panel ending-screen">
@@ -145,7 +177,8 @@
 
     <div class="ending-copy">
       <p class="eyebrow">RUN COMPLETE</p>
-      <h2>FIN DEL RECORRIDO</h2>
+      <h2>{{ finalRunTitle }}</h2>
+      <p class="lead ending-title-copy">Fin del recorrido / salida registrada en {{ finalZoneLabel }}</p>
 
       <div class="ending-grid">
         <article class="ending-card">
@@ -165,6 +198,82 @@
           <strong>Equipos peque&ntilde;os, ideas enormes</strong>
         </article>
       </div>
+
+      <div class="ending-runboard">
+        <article class="ending-card">
+          <span class="micro-label">ZONAS LIMPIAS</span>
+          <strong>{{ clearedZonesLabel }}</strong>
+        </article>
+        <article class="ending-card">
+          <span class="micro-label">RELIQUIAS</span>
+          <strong>{{ relicCountLabel }}</strong>
+        </article>
+        <article class="ending-card">
+          <span class="micro-label">SECRETOS</span>
+          <strong>{{ secretCountLabel }}</strong>
+        </article>
+        <article class="ending-card">
+          <span class="micro-label">EVENTOS</span>
+          <strong>{{ eventCountLabel }}</strong>
+        </article>
+        <article class="ending-card">
+          <span class="micro-label">BUILD</span>
+          <strong>{{ heroStatus }}</strong>
+        </article>
+        <article class="ending-card">
+          <span class="micro-label">ESTILO</span>
+          <strong>{{ heroBuildSummary }}</strong>
+        </article>
+      </div>
+
+      <section class="text-frame ending-report">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">INFORME FINAL</p>
+            <h3>Tarjeta premium de la run</h3>
+          </div>
+          <p class="terminal-subtitle">
+            El cierre ahora tambi&eacute;n registra t&iacute;tulo, secretos y momentos activados dentro del recorrido.
+          </p>
+        </div>
+
+        <div class="ending-report-grid">
+          <div class="ending-avatar-card">
+            <img class="ending-avatar-preview" [src]="heroPreview" alt="Vista final de Ghost">
+            <div>
+              <p class="micro-label">OPERADOR</p>
+              <strong>{{ heroStatus }}</strong>
+              <p>{{ heroBuildSummary }}</p>
+            </div>
+          </div>
+
+          <div class="ending-report-copy">
+            <p class="micro-label">MENSAJE FINAL</p>
+            <p>{{ finalRunMessage }}</p>
+          </div>
+
+          <div class="ending-run-card" [class.perfect]="hasPerfectArchive">
+            <p class="micro-label">RUN CARD</p>
+            <strong>{{ finalRunTitle }}</strong>
+            <p>{{ finalRunCardLine }}</p>
+            <span>{{ finalZoneLabel }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="lastRunReport?.relicsUnlocked?.length" class="ending-relic-strip">
+          <article *ngFor="let relic of lastRunReport?.relicsUnlocked; let i = index" class="ending-relic">
+            <span>R{{ i + 1 }}</span>
+            <strong>{{ relic }}</strong>
+          </article>
+        </div>
+
+        <div *ngIf="lastRunReport?.secretFinds?.length" class="ending-secret-strip">
+          <article *ngFor="let secret of lastRunReport?.secretFinds" class="ending-secret-card">
+            <span class="micro-label">{{ secret.zone }}</span>
+            <strong>{{ secret.title }}</strong>
+          </article>
+        </div>
+      </section>
 
       <div class="text-frame outro-box">
         <p class="system-line">
